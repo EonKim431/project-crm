@@ -6,6 +6,9 @@
 <head>
 <meta charset="UTF-8">
 <title>고객정보 관리</title>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+	integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+	crossorigin="anonymous"></script>
 <style>
 body {
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -185,11 +188,11 @@ body {
 						<h2>고객 조회</h2>
 					</div>
 					<div class="card-body">
-						<input type="text" id="searchInput" placeholder="고객 이름을 입력하세요">
-						<button class="btn btn-primary">조건 검색</button>
-						<button class="btn btn-secondary">전체 검색</button>
+						<input type="text" id="searchInput" placeholder="고객 이름을 입력하세요" name="searchInput">
+						<button class="btn btn-primary" id="search">조건 검색</button>
+						<button class="btn btn-secondary"  id="searchAll">전체 검색</button>
 						<div id="searchResults">
-							<div>
+							<!-- <div>
 								<input type="radio" name="customer" id="customer1"> <label
 									for="customer1">홍길동</label>
 							</div>
@@ -216,7 +219,7 @@ body {
 							<div>
 								<input type="radio" name="customer" id="customer7"> <label
 									for="customer7">이성경</label>
-							</div>
+							</div> -->
 						</div>
 					</div>
 				</div>
@@ -228,7 +231,7 @@ body {
 						<h2>고객 정보</h2>
 					</div>
 					<div class="card-body">
-						<form action="" method="post" id="frm_update">
+						<form action="" method="post" id="frm_update" action="">
 							<div class="form-group">
 								<label for="FRST_REG_DT">작성일자</label> <input type="text"
 									name="FRST_REG_DT" id="FRST_REG_DT">
@@ -297,7 +300,7 @@ body {
 								<button class="btn btn-primary">등록</button>
 								<button class="btn btn-primary">변경</button>
 								<button class="btn btn-primary">삭제</button>
-								<button class="btn btn-primary">신규</button>
+								<button class="btn btn-primary" id="res">신규</button>
 							</div>
 							<div class="d-flex flex-wrap justify-content-space-between">
 								<button class="btn btn-danger">고객조회</button>
@@ -322,5 +325,209 @@ body {
 		    }
 		});
 	</script>
+</body>
+</html> 
+<script>
+	var allData;
+	$(document).ready(function() {		
+		let now = new Date();
+	    let year = now.getFullYear();
+	    let month = now.getMonth() + 1;
+	    let day = now.getDate();
+		$("#FRST_REG_DT").val(
+				year + '-' + (month < 10 ? '0' + month : month) + '-' + (day < 10 ? '0' + day : day)
+				);
+		$("#search").on("click", function() {
+		    var keyword = $("#searchInput").val().trim();
+		    if (keyword == "") {
+		      alert('아이디를 입력하세요')
+		    } else {
+		      var keyname = "keyword";
+		      var obj = {};
+		      obj[keyname] = keyword;
+		      $.ajax({
+		        url : "<c:url value='/searchAjax' />",
+		        type : "post",
+		        data : JSON
+		            .stringify(obj),
+		        dataType : "json",
+		        contentType : "application/json",
+		        success : function(data) {
+		          $("#searchResults").empty();
+		          for (var i = 0; i < data.length; i++) {
+		            if(i == 0){
+		            	var str = "<label><input type='radio' id='" + data[i].cust_SN + "' name='result' class='result' checked>"
+		                + data[i].cust_NM
+		                + "</label><br>";
+			            console.log(str);
+			            $("#searchResults").append(str);
+		            	var strContent = "<td>" + data[i].a_name + "</td><td>" + data[i].a_phone + "</td>"
+		            	$("#content").html(strContent);
+		            } else {
+		            	var item = data[i].cust_NM;
+		            	console.log(data[i].cust_NM)
+		            	var str = "<label><input type='radio' id='" + data[1].cust_SN + "' name='result'>"
+		                + data[i].cust_NM
+		                + "</label><br>";
+			            $("#searchResults").append(str);
+		            }
+		          }
+		        },
+		        error : function(
+		            errorThrown) {
+		          alert(errorThrown.statusText);
+		        }
+		      });
+			}
+		    });
+		
+		$("#searchAll").on("click", function() {
+		      var obj = {};
+		      $.ajax({
+		        url : "<c:url value='/searchAllAjax' />",
+		        type : "post",
+		        data : JSON
+		            .stringify(obj),
+		        dataType : "json",
+		        contentType : "application/json",
+		        success : function(data) {
+		          $("#searchResults").empty();
+		          for (var i = 0; i < data.length; i++) {
+		            if(i == 0){
+		            	var str = "<label><input type='radio' id='" + data[i].cust_SN + "' name='result' class='result' checked>"
+		                + data[i].cust_NM
+		                + "</label><br>";
+			            console.log(str);
+			            $("#searchResults").append(str);
+		            	var strContent = "<td>" + data[i].a_name + "</td><td>" + data[i].a_phone + "</td>"
+		            	$("#content").html(strContent);
+		            } else {
+		            	var item = data[i].cust_NM;
+		            	console.log(data[i].cust_NM)
+		            	var str = "<label><input type='radio' id='" + data[1].cust_SN + "' name='result'>"
+		                + data[i].cust_NM
+		                + "</label><br>";
+			            $("#searchResults").append(str);
+		            }
+		          }
+		        },
+		        error : function(
+		            errorThrown) {
+		          alert(errorThrown.statusText);
+		        }
+		      });
+		    });
+		
+		$("#res").on("click",function(){
+			$("#frm_update").each(function() {
+			    this.reset();
+			});
+			let now = new Date();
+		    let year = now.getFullYear();
+		    let month = now.getMonth() + 1;
+		    let day = now.getDate();
+			$("#FRST_REG_DT").val(
+					year + '-' + (month < 10 ? '0' + month : month) + '-' + (day < 10 ? '0' + day : day)
+					);
+		});
+		
+		$(document).on("change", "input:radio[name='result']", function(){
+			$("#FRST_REG_DT").val("1");
+			var targetId = $(this).attr('id');
+		    var keyname = "keyword";
+		    var obj = {};
+		    var cust_SN;
+		    var cust_NM;
+		    var vbrdt;
+		    var home_TELNO;
+		    var mbl_TELNO ;
+		    var pridtf_NO;
+		    var cr_NM;
+		    var road_NM_ADDR;
+		    var pic_SN_VL;
+		    var tkcg_DEPT_NM;
+		    var frst_REG_DT;
+		    var last_MDFCN_DT;
+		    var use_YN;
+		    obj[keyname] = targetId;
+				$.ajax({
+		      url : "<c:url value='/searchOneAjax' />",
+		      type : "post",
+		      data : JSON
+		          .stringify(obj),
+		      dataType : "json",
+		      contentType : "application/json",
+		      success : function(data) {
+		        // var strContent = "<td>" + data[0].a_name + "</td><td>" + data[0].a_phone + "</td>" 
+		        cust_SN =  data.cust_SN;
+		        cust_NM =  data.cust_NM;
+		        vbrdt =  data.vbrdt;
+		        home_TELNO =  data.home_TELNO;
+		        mbl_TELNO =  data.mbl_TELNO;
+		        pridtf_NO =  data.pridtf_NO;
+		        cr_NM =  data.cr_NM;
+		        road_NM_ADDR =  data.road_NM_ADDR;
+		        pic_SN_VL =  data.pic_SN_VL;
+		        tkcg_DEPT_NM =  data.tkcg_DEPT_NM;
+		        frst_REG_DT =  data.frst_REG_DT;
+		        last_MDFCN_DT =  data.last_MDFCN_DT;
+		        use_YN =  data.use_YN;
+		        $("#CUST_NM").val(cust_NM);
+				$("#FRST_REG_DT").val(frst_REG_DT);
+				$("#CUST_SN").val(cust_SN);
+				$("#VBRDT").val(vbrdt);
+				$("#HOME_TELNO").val(home_TELNO);
+				$("#CR_NM").val(cr_NM);
+				$("#ROAD_NM_ADDR").val(road_NM_ADDR);
+				$("#PIC_SN_VL").val(pic_SN_VL);
+				$("#LAST_MDFCN_DT").val(last_MDFCN_DT);
+				$("#USE_YN").val(use_YN);
+		      },
+		      error : function(
+		          errorThrown) {
+		        alert(errorThrown.statusText);
+		      }
+		    });
+		});
+		
+	});
+	
+</script>
+</head>
+<body>
+	<table>
+		<tr>
+			<th>아이디</th>
+		</tr>
+		<tr>
+			<td>
+				<!-- 어드민검색 영역-->
+				<table>
+					<tr>
+						<td><input type="text" name="keyword" id="keyword"></td>
+					</tr>
+
+
+					<tr>
+						<td>
+							<!-- 검색 결과 보이는곳 -->
+							<div id="result"></div> <!-- 검색 결과 보이는곳 여기까지-->
+						</td>
+					</tr>
+
+				</table> <!-- 어드민검색 영역 여기까지-->
+			</td>
+		</tr>
+	</table>
+	<!-- 조회정보표시영역 -->
+	<table border="1">
+		<tr>
+			<th>닉네임</th>
+			<th>전화번호</th>
+		</tr>
+		<!-- 검색 결과 보이는곳 -->
+
+		
+	</table> <!-- 조회정보표시영역 여기까지-->
 </body>
 </html>
